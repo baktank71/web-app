@@ -91,6 +91,9 @@ public class TeleHealthService extends EgovAbstractServiceImpl{
                 teleVO.setLoginId(vo.getLoginId());
                 teleVO.setSessionId(ssid);
                 teleVO.setOfficerToken(ofToken);
+                teleVO.setAdmissionId(vo.getAdmissionId());
+
+
 
                 int rtn = teleHealthDao.insertSession(teleVO);
 
@@ -133,7 +136,6 @@ public class TeleHealthService extends EgovAbstractServiceImpl{
             vo.setAttendeeToken(attendeeToken);
 
             //생성된 구독자 토큰 저장
-            int rtn = teleHealthDao.udpSubscriberToken(teleVO);
 
             //
             teleVO.setLoginId(vo.getLoginId());
@@ -141,6 +143,9 @@ public class TeleHealthService extends EgovAbstractServiceImpl{
             teleVO.setSessionId(sessionId);
             teleVO.setAttendeeToken(attendeeToken);
             teleVO.setAdmissionId(vo.getAdmissionId());
+
+            int rtn = teleHealthDao.udpSubscriberToken(teleVO);
+
 
             //# 참석자(대상자 & 보호자)에게 푸시내역 생성
             //createTelehealthStartPush(teleEntity);
