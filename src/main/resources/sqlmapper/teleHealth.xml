@@ -11,7 +11,7 @@
                REG_DT
         FROM telehealth
         where LOGIN_ID = #{loginId}
-          and USE_END_DD is null;
+          and USE_END_DD is null OR USE_END_DD = '';
     </select>
     <select id="selectSubscriber" parameterType="kr.co.hconnect.vo.TeleHealthConnectVO"  resultType="kr.co.hconnect.vo.TeleHealthConnectVO">
         SELECT LOGIN_ID,
@@ -23,17 +23,19 @@
                REG_DT
         FROM telehealth
         where ADMISSION_ID = #{admissionId}
-          and USE_END_DD is null;
+          and USE_END_DD is null OR USE_END_DD = '';
     </select>
 
     <insert id="insertSession" parameterType="kr.co.hconnect.vo.TeleHealthConnectVO">
         insert into telehealth (LOGIN_ID,
                                 SESSION_ID,
                                 OFFICEER_TOKEN,
+                                ADMISSION_ID,
                                 REG_DT)
         values (#{loginId},
                 #{sessionId},
                 #{officerToken},
+                #{admissionId},
                 now())
     </insert>
 
@@ -41,14 +43,14 @@
         update telehealth
            set ATTENDEE_TOKEN = #{attendeeToken}
         where ADMISSION_ID = #{admissionId}
-          and USE_END_DD is null
+          and SESSION_ID = #{sessionId}
         ;
     </update>
     <update id="endSession" parameterType="kr.co.hconnect.vo.TeleHealthSearchVO">
         update telehealth
            set USE_END_DD = DATE_FORMAT(now(), '%Y%m%d')
         where LOGIN_ID = #{loginId}
-          and USE_END_DD is null
+          and USE_END_DD is null OR USE_END_DD = ''
         ;
     </update>
 </mapper>
