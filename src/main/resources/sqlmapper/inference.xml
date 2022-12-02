@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.hconnect.sqlmapper">
+    <insert id="insInf" parameterType="kr.co.hconnect.vo.AiInferenceVO">
+        <![CDATA[
+            INSERT
+            INTO inference
+            (
+                ADMISSION_ID,
+                INF_DIV,
+                INF_VALUE,
+                REG_DT
+            )
+            VALUES
+                ( #{admissionId}
+                , #{infDiv}
+                , #{infValue}
+                , now()
+                )
+            ]]>
+    </insert>
+
+    <insert id="insInfLog" parameterType="kr.co.hconnect.vo.AiInferenceVO">
+        <![CDATA[
+        INSERT
+        INTO inference
+        (
+            ADMISSION_ID,
+            INF_DIV,
+            INF_VALUE,
+            REG_DT
+        )
+        VALUES
+            ( #{admissionId}
+            , #{infDiv}
+            , #{infValue}
+            , now()
+            )
+        ]]>
+    </insert>
+
+    <delete id="delInf" parameterType="kr.co.hconnect.vo.AiInferenceVO">
+        <![CDATA[
+            delete from inference
+            where inf_div = #{infDiv}
+        ]]>
+    </delete>
+</mapper>
