@@ -7,6 +7,7 @@ import kr.co.hconnect.repository.AdmissionDao;
 import kr.co.hconnect.repository.NoticeDao;
 import kr.co.hconnect.vo.AdmissionInfoVO;
 import kr.co.hconnect.vo.NoticeListSearchVO;
+import kr.co.hconnect.vo.NoticeListVO;
 import kr.co.hconnect.vo.NoticeVO;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
@@ -73,7 +74,19 @@ public class NoticeService extends EgovAbstractServiceImpl {
      * @param vo 알림 리스트 조회 조건
      * @return List&lt;NoticeVO&gt; 알림 리스트
      */
+    public List<NoticeListVO> selectnoticeAppList(NoticeListSearchVO vo) {
+        return noticeDao.selectnoticeAppList(vo);
+    }
+
+
+    /**
+     * 알림 리스트 조회 - 격리/입소내역ID 기준
+     *
+     * @param vo 알림 리스트 조회 조건
+     * @return List&lt;NoticeVO&gt; 알림 리스트
+     */
     public List<NoticeVO> selectNoticeList(NoticeListSearchVO vo) {
         return noticeDao.selectNoticeListByAdmissionId(vo);
     }
+
 }
