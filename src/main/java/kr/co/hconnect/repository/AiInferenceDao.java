@@ -5,6 +5,8 @@ import org.springframework.stereotype.Repository;
 import egovframework.rte.psl.dataaccess.EgovAbstractMapper;
 import kr.co.hconnect.vo.*;
 
+import java.util.List;
+
 @Repository
 public class AiInferenceDao extends EgovAbstractMapper {
 
@@ -13,11 +15,14 @@ public class AiInferenceDao extends EgovAbstractMapper {
     }
 
     public void insInf_log (AiInferenceVO vo) {
-        insert("kr.co.hconnect.sqlmapper.insInf", vo);
+        insert("kr.co.hconnect.sqlmapper.insInf_log", vo);
     }
 
     public void delInf (AiInferenceVO vo) {
         delete("kr.co.hconnect.sqlmapper.udpScore", vo);
     }
 
+    public List<ScoreVO> scoreList() {
+        return selectList("kr.co.hconnect.sqlmapper.scoreList");
+    }
 }

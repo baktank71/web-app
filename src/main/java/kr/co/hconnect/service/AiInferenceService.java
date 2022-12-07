@@ -19,11 +19,11 @@ import java.util.Locale;
 @Service
 @Transactional(rollbackFor = Exception.class, readOnly = true)
 public class AiInferenceService extends EgovAbstractServiceImpl{
-    private  final AiInferenceDao dao;
-
-    public AiInferenceService(AiInferenceDao dao) {
-        this.dao = dao;
-    }
+    // private  final AiInferenceDao dao;
+    //
+    // public AiInferenceService(AiInferenceDao dao) {
+    //     this.dao = dao;
+    // }
     @Transactional(rollbackFor = Exception.class)
     public String insertInference(AiInferenceVO vo) throws FdlException, IOException {
 
