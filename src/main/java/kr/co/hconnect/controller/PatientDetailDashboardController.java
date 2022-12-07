@@ -1,15 +1,18 @@
 package kr.co.hconnect.controller;
 
 import kr.co.hconnect.common.ApiResponseCode;
+import kr.co.hconnect.domain.LoginId;
 import kr.co.hconnect.exception.InvalidRequestArgumentException;
 import kr.co.hconnect.exception.NotFoundAdmissionInfoException;
 import kr.co.hconnect.jwt.TokenDetailInfo;
+import kr.co.hconnect.service.AdmissionService;
 import kr.co.hconnect.service.NoticeService;
 import kr.co.hconnect.service.PatientDetailDashboardService;
 import kr.co.hconnect.vo.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,18 +40,29 @@ public class PatientDetailDashboardController {
 	 */
 	public final NoticeService noticeService;
 
-	/**
+    /**
+     * 격리/입소내역 관리 Service
+     */
+    private final AdmissionService admissionService;
+
+    private final MessageSource messageSource;
+
+
+
+
+    /**
 	 * 생성자
 	 *
 	 * @param patientDetailDashboardService 환자상세 대시보드 서비스
 	 * @param noticeService 알림 서비스
 	 */
 	@Autowired
-	public PatientDetailDashboardController(PatientDetailDashboardService patientDetailDashboardService, NoticeService noticeService) {
-		this.patientDetailDashboardService = patientDetailDashboardService;
-		this.noticeService = noticeService;
-	}
-
+    public PatientDetailDashboardController(PatientDetailDashboardService patientDetailDashboardService, NoticeService noticeService, AdmissionService admissionService, MessageSource messageSource) {
+        this.patientDetailDashboardService = patientDetailDashboardService;
+        this.noticeService = noticeService;
+        this.admissionService = admissionService;
+        this.messageSource = messageSource;
+    }
 	/**
 	 * 환자 상세 대시보드 정보 조회
 	 *
@@ -107,7 +121,38 @@ public class PatientDetailDashboardController {
 		return responseVO;
 	}
 
-	/**
+    /**
+     *  맵에서 알림 리스트 조회
+     * @param vo
+     * @param bindingResult
+     * @param tokenDetailInfo
+     * @return
+     */
+    @RequestMapping(value = "/noticeAppList", method = RequestMethod.POST)
+    public ResponseBaseVO<List<NoticeListVO>> selectnoticeAppList(@Valid @RequestBody LoginId vo, BindingResult bindingResult
+        , @RequestAttribute TokenDetailInfo tokenDetailInfo) {
+        if (bindingResult.hasErrors()) {
+            throw new InvalidRequestArgumentException(bindingResult);
+        }
+
+
+        // 격리/입소내역ID
+        String admissionId = admissionService.selectActiveAdmissionByLoginId(vo.getLoginId()).getAdmissionId();
+
+        NoticeListSearchVO entity = new NoticeListSearchVO();
+        entity.setAdmissionId(admissionId);
+
+        ResponseBaseVO<List<NoticeListVO>> responseVO = new ResponseBaseVO<>();
+        responseVO.setCode(ApiResponseCode.SUCCESS.getCode());
+        responseVO.setMessage("조회 성공");
+        responseVO.setResult(noticeService.selectnoticeAppList(entity));
+
+        return responseVO;
+    }
+
+
+
+    /**
 	 * 환자 Vital 측정결과 차트용 헤더 정보 조회
 	 *
 	 * @param admissionId 격리/입소내역ID
