@@ -14,9 +14,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 import com.opentok.*;
 import com.opentok.exception.OpenTokException;
+
+import kr.co.hconnect.common.HttpUtil;
+
+
 
 /**
  * 화상상담 서비스
@@ -172,4 +177,64 @@ public class TeleHealthService extends EgovAbstractServiceImpl{
         }
         return rtn;
     }
+
+
+    //푸시발송 테스트
+    public int sendPush (TeleHealthSearchVO vo){
+        int rtn = 0;
+
+        try {
+
+            System.out.println("푸시메세지 시작");
+
+            System.out.println("푸시메세지 파라메터");
+
+            HashMap<String, Object> params = new HashMap<String , Object>();
+            params.put("CUID", "smile01");
+            params.put("MESSAGE", "{\n" +
+                "\"title\": \"안녕하세요\",\n" +
+                "\"body\": \"자택격리를 축하드립니다 202212121048\"\n" +
+                "}");
+            params.put("PRIORITY", "3");
+            params.put("BADGENO", "0");
+            params.put("RESERVEDATE", "");
+            params.put("SERVICECODE", "ALL");
+            params.put("SOUNDFILE", "alert.aif");
+            params.put("EXT", "");
+            params.put("SENDERCODE", "smile");
+            params.put("APP_ID", "iitp.infection.pm");
+            params.put("TYPE", "E");
+            params.put("DB_IN", "Y");
+
+            /**
+             * x-www-form-urlencode -> ??
+             * APPLICATION_FORM_URLENCODED_VALUE
+             * json - 성공
+             * body 값 확인 해야 됨
+             *                 .contentType("application", vo.getSubType(), vo.getSubType())
+             */
+            System.out.println("푸시메세지 발송시작");
+
+            HashMap<String, Object> result = new HttpUtil()
+                .url("http://192.168.42.193:8380/upmc/rcv_register_message.ctl")
+                .method("POST")
+                .body(params)
+                .build();
+
+            System.out.println("푸시메세지 발송끝");
+
+            System.out.println("status ===>> " + (result.get("status").toString()));
+            System.out.println("headers  ===>> " + (result.get("header").toString()));
+            System.out.println("body ===>> " + (result.get("body").toString()));
+
+        } catch (Exception e){
+            rtn=1;
+            System.out.println(e.getMessage());
+
+        }
+
+        return rtn;
+    }
+
+
 }
