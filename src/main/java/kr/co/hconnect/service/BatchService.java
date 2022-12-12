@@ -1,19 +1,9 @@
 package kr.co.hconnect.service;
 
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import egovframework.rte.fdl.cmmn.EgovAbstractServiceImpl;
 import egovframework.rte.fdl.cmmn.exception.FdlException;
-import egovframework.rte.fdl.idgnr.EgovIdGnrService;
-import kr.co.hconnect.exception.ActiveAdmissionExistsException;
-import kr.co.hconnect.repository.PatientDeviceDao;
-import kr.co.hconnect.repository.PatientEquipDao;
-import kr.co.hconnect.repository.TreatmentCenterDao;
 import kr.co.hconnect.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.MessageSource;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import kr.co.hconnect.repository.*;

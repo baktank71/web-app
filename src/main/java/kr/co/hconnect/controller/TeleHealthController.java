@@ -125,4 +125,24 @@ public class TeleHealthController {
         return responseVO;
     }
 
+    @RequestMapping(value = "/setPush", method = RequestMethod.POST)
+    public ResponseBaseVO<TeleHealthConnectVO> sendPush(@Validated(VoValidationGroups.add.class) @RequestBody TeleHealthSearchVO vo
+        , BindingResult bindingResult, @RequestAttribute TokenDetailInfo tokenDetailInfo) {
+
+        if (bindingResult.hasErrors()) {
+            throw new InvalidRequestArgumentException(bindingResult);
+        }
+        ResponseBaseVO<TeleHealthConnectVO> responseVO = new ResponseBaseVO<>();
+        try{
+            int rtn = teleHealthService.sendPush(vo);
+            responseVO.setCode(ApiResponseCode.SUCCESS.getCode());
+            responseVO.setMessage("푸시메세지 정상 발송");
+
+        }catch (Exception  e){
+            responseVO.setCode(ApiResponseCode.CODE_INVALID_REQUEST_PARAMETER.getCode());
+            responseVO.setMessage(e.getMessage());
+        }
+        return responseVO;
+    }
+
 }
