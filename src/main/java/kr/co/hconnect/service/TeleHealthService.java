@@ -1,10 +1,9 @@
 package kr.co.hconnect.service;
 
 import egovframework.rte.fdl.cmmn.EgovAbstractServiceImpl;
-import egovframework.rte.fdl.cmmn.exception.FdlException;
-import egovframework.rte.fdl.idgnr.EgovIdGnrService;
 import kr.co.hconnect.vo.*;
 import kr.co.hconnect.repository.TeleHealthDao;
+import kr.co.hconnect.repository.UserDao;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -33,12 +32,15 @@ public class TeleHealthService extends EgovAbstractServiceImpl{
     private int apikey = 47595911;
     private String apiSecret = "2ddde1eb92a2528bd22be0c465174636daca363d";
 
-    private TeleHealthDao teleHealthDao;
+    private final TeleHealthDao teleHealthDao;
+    private final UserDao userDao;
+
 
 
     @Autowired
-    public TeleHealthService(TeleHealthDao teleHealthDao) {
+    public TeleHealthService(TeleHealthDao teleHealthDao, UserDao userDao) {
         this.teleHealthDao = teleHealthDao;
+        this.userDao = userDao;
     }
 
 
@@ -98,12 +100,10 @@ public class TeleHealthService extends EgovAbstractServiceImpl{
                 teleVO.setOfficerToken(ofToken);
                 teleVO.setAdmissionId(vo.getAdmissionId());
 
-
-
                 int rtn = teleHealthDao.insertSession(teleVO);
 
                 //# 참석자(대상자 & 보호자)에게 푸시내역 생성
-                //createTelehealthStartPush(teleEntity);
+                createTelehealthStartPush(teleVO);
 
 
             } catch (OpenTokException e){
@@ -177,55 +177,108 @@ public class TeleHealthService extends EgovAbstractServiceImpl{
         }
         return rtn;
     }
+    public void createTelehealthStartPush(TeleHealthConnectVO vo){
+        //텔레헬스
+        String admissionId = vo.getAdmissionId();
+        String CUID = userDao.selectPationtLoginId(admissionId);
+        System.out.println("=====================================");
+        System.out.println(CUID);
+        System.out.println("=====================================");
+
+        CUID = "smile01";
+
+        String message = "화상진료를 시작합니다. 참여 부탁드립니다!";
+        String sessionId  = vo.getSessionId();
+
+        TeleHealthConnectVO  teleSsubVO = new TeleHealthConnectVO();
+
+        OpenTok openTok = null;
+        try {
+            vo.setApiKey(apikey);
+            vo.setApiSecret(apiSecret);
+
+            openTok = new OpenTok(vo.getApiKey(), vo.getApiSecret());
+            String attendeeToken = openTok.generateToken(sessionId);
+
+            vo.setAttendeeToken(attendeeToken);
+
+            //생성된 구독자 토큰 저장
+
+            //
+            teleSsubVO.setLoginId(vo.getLoginId());
+            teleSsubVO.setApiKey(apikey);
+            teleSsubVO.setSessionId(sessionId);
+            teleSsubVO.setAttendeeToken(attendeeToken);
+            teleSsubVO.setAdmissionId(vo.getAdmissionId());
+
+            int rtn = teleHealthDao.udpSubscriberToken(teleSsubVO);
+
+            HashMap<String, Object> mapValue = new HashMap<String, Object>();
+            mapValue.put("CUID", CUID);
+            mapValue.put("MESSAGE", message);
+            mapValue.put("apikey", apikey);
+            mapValue.put("sessionId", vo.getSessionId());
+            mapValue.put("attendeeToken", attendeeToken);
+
+            //#푸시내역 생성
+            int ret = sendPush(mapValue);
+
+        } catch (OpenTokException e){
+            System.out.println(e.getMessage());
+        }
+
+
+
+    }
 
 
     //푸시발송 테스트
-    public int sendPush (TeleHealthSearchVO vo){
+    public int sendPush (HashMap<String, Object> mapValue){
         int rtn = 0;
 
         try {
 
-            System.out.println("푸시메세지 시작");
+            String cuid = mapValue.get("CUID").toString();
+            String msg =  mapValue.get("MESSAGE").toString();
 
-            System.out.println("푸시메세지 파라메터");
+            String apikey =  mapValue.get("apikey").toString();
+            String sessionID =  mapValue.get("sessionId").toString();
+            String token =  mapValue.get("attendeeToken").toString();
+
+            String message = "{\n" +
+                "    \"title\": \" 안녕하세요 \",\n" +
+                "    \"body\": \"" + msg + "\"\n" +
+                "}";
+
+            String attendeeToken = "{\n" +
+                "    \"action\": \"doctor\",\n" +
+                "    \"infomation\": {\n" +
+                "        \"apikey\": \"" + apikey + "\",\n" +
+                "        \"sessionId\": \""+ sessionID + "\",\n" +
+                "        \"token\": \""+ token +"\"\n" +
+                "    }\n" +
+                "}";
+
 
             HashMap<String, Object> params = new HashMap<String , Object>();
-            params.put("CUID", "smile01");
-            params.put("MESSAGE", "{\n" +
-                "\"title\": \"안녕하세요\",\n" +
-                "\"body\": \"자택격리를 축하드립니다 202212121048\"\n" +
-                "}");
+            params.put("CUID", cuid);
+            params.put("MESSAGE", message);
             params.put("PRIORITY", "3");
             params.put("BADGENO", "0");
             params.put("RESERVEDATE", "");
             params.put("SERVICECODE", "ALL");
             params.put("SOUNDFILE", "alert.aif");
-            params.put("EXT", "");
+            params.put("EXT", attendeeToken);
             params.put("SENDERCODE", "smile");
             params.put("APP_ID", "iitp.infection.pm");
             params.put("TYPE", "E");
             params.put("DB_IN", "Y");
-
-            /**
-             * x-www-form-urlencode -> ??
-             * APPLICATION_FORM_URLENCODED_VALUE
-             * json - 성공
-             * body 값 확인 해야 됨
-             *                 .contentType("application", vo.getSubType(), vo.getSubType())
-             */
-            System.out.println("푸시메세지 발송시작");
 
             HashMap<String, Object> result = new HttpUtil()
                 .url("http://192.168.42.193:8380/upmc/rcv_register_message.ctl")
                 .method("POST")
                 .body(params)
                 .build();
-
-            System.out.println("푸시메세지 발송끝");
-
-            System.out.println("status ===>> " + (result.get("status").toString()));
-            System.out.println("headers  ===>> " + (result.get("header").toString()));
-            System.out.println("body ===>> " + (result.get("body").toString()));
 
         } catch (Exception e){
             rtn=1;
