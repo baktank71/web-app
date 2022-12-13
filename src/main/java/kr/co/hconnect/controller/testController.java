@@ -1,5 +1,6 @@
 package kr.co.hconnect.controller;
 import com.opentok.exception.OpenTokException;
+import com.sun.xml.internal.ws.api.ha.StickyFeature;
 import egovframework.rte.fdl.cmmn.exception.FdlException;
 import kr.co.hconnect.common.ApiResponseCode;
 import kr.co.hconnect.common.VoValidationGroups;
@@ -46,9 +47,14 @@ public class testController {
         ResponseBaseVO<testVO> responseVO = new ResponseBaseVO<>();
 
         try {
-            int rtn = testService.fileDownload();
+            String rtn = testService.fileDownload2(vo);
+
+            vo.setArchiveUrl(rtn);
+
             responseVO.setCode(ApiResponseCode.SUCCESS.getCode());
             responseVO.setMessage("fileDown ok");
+            responseVO.setResult(vo);
+
         } catch (NotFoundUserInfoException e) {
             responseVO.setCode(ApiResponseCode.CODE_INVALID_REQUEST_PARAMETER.getCode());
             responseVO.setMessage(e.getMessage());

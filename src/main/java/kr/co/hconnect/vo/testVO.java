@@ -20,4 +20,8 @@ public class testVO implements Serializable {
 
     private String loginId;
 
+    private String archiveId;
+
+    private String archiveUrl;
+
 }

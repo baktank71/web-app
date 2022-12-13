@@ -118,4 +118,29 @@
                 order by A.ADMISSION_ID
         ]]>
     </select>
+
+    <select id="archiveList"  parameterType="kr.co.hconnect.vo.ArchiveVO" resultType="kr.co.hconnect.vo.ArchiveVO">
+        <![CDATA[
+        SELECT ARCHIVE_ID,
+               CREATE_AT,
+               PARTNER_ID,
+               NAME,
+               SESSION_ID,
+               SIZE,
+               STATUS,
+               OUTPUT_MODE,
+               REASON,
+               DOWN_YN
+        FROM archive
+       WHERE STATUS ='stopped'
+         AND IFNULL(DOWN_YN,'N') ='N'
+        ]]>
+    </select>
+
+    <update id="udpArchive"  parameterType="kr.co.hconnect.vo.ArchiveVO" >
+        UPDATE archive
+         SET DOWN_YN ='Y'
+        WHERE ARCHIVE_ID ='stopped'
+    </update>
+
 </mapper>
