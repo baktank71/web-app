@@ -12,6 +12,8 @@ import org.springframework.util.ResourceUtils;
 
 
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
@@ -252,48 +254,7 @@ public class BatchService extends EgovAbstractServiceImpl{
     }
 
 
-    /**
-     * 아카리브 파일 다운로드
-     * @return
-     */
 
-    public void fileDownload() throws IOException, OpenTokException {
-
-        String OUTPUT_FILE_PATH = "출력 파일 경로";
-        String FILE_URL = "리소스 경로";
-        String archiveId = "아카이브 파일 경로";
-
-        Archive archive = null;
-        try {
-
-            OpenTok openTok = new OpenTok(apikey, apiSecret);
-            archive =openTok.getArchive("archiveId");
-
-            FILE_URL = archive.getUrl();
-
-            InputStream in = new URL(FILE_URL).openStream();
-            Path imagePath = Paths.get(OUTPUT_FILE_PATH);
-            Files.copy(in, imagePath);
-
-            // BufferedInputStream in = new BufferedInputStream(new URL(FILE_URL).openStream());
-            // FileOutputStream fileOutputStream = new FileOutputStream(OUTPUT_FILE_PATH){
-            //     byte dataBuffer[] = new byte[1024];
-            //     int bytesRead;
-            //     while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-            //         fileOutputStream.write(dataBuffer, 0, bytesRead);
-            //     }
-            // }
-        } catch ( OpenTokException e){
-
-        } catch(IOException e){}
-
-        // try(InputStream in = new URL(FILE_URL).openStream()){
-        //     Path imagePath = Paths.get(OUTPUT_FILE_PATH);
-        //     Files.copy(in, imagePath);
-        // }
-
-
-    }
 
     /**
      * 파이썬 파일 실행
@@ -344,6 +305,112 @@ public class BatchService extends EgovAbstractServiceImpl{
         }
 
     }
+
+
+    /**
+     * 아카리브 파일 다운로드
+     * @return
+     */
+    public String fileDownload(ArchiveVO vo) throws IOException, OpenTokException , MalformedURLException {
+
+        String rtn = "";
+
+        String OUTPUT_FILE_PATH = ""; // "출력 파일 경로";
+        String FILE_URL ="";         // "리소스 경로";
+        String outputDir  = "E:\\socre\\";
+        Archive archive = null;
+
+        InputStream is = null;
+        FileOutputStream os = null;
+
+        //아카이브 아이디 찾기
+        String archiveId = vo.getArchiveId();
+
+        try{
+            OpenTok openTok = new OpenTok(apikey, apiSecret);
+            archive =openTok.getArchive(archiveId);
+
+            FILE_URL = archive.getUrl();
+
+            rtn = FILE_URL;
+
+            //해당 url
+            URL url = new URL(FILE_URL);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            int responseCode = conn.getResponseCode();
+
+            System.out.println("responseCode " + responseCode);
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                String fileName = "";
+                String disposition = conn.getHeaderField("Content-Disposition");
+                String contentType = conn.getContentType();
+
+                // 일반적으로 Content-Disposition 헤더에 있지만
+                // 없을 경우 url 에서 추출해 내면 된다.
+                // if (disposition != null) {
+                //     String target = "filename=";
+                //     int index = disposition.indexOf(target);
+                //     if (index != -1) {
+                //         fileName = disposition.substring(index + target.length() + 1);
+                //     }
+                // } else {
+                //     //fileName = FILE_URL.substring(FILE_URL.lastIndexOf("/") + 1);
+                //     fileName = "archive.mp4";
+                //
+                // }
+
+                //파일이름 규칙
+                // admission_di + "-" + 년월일시분
+                //A999999624_202212130737
+                SimpleDateFormat format = new SimpleDateFormat ( "yyyyMMddHHmm");
+                String formatdate = format.format (System.currentTimeMillis());
+                fileName =vo.getName() +"_"+ formatdate+ ".mp4";
+
+                System.out.println("Content-Type = " + contentType);
+                System.out.println("Content-Disposition = " + disposition);
+                System.out.println("fileName = " + fileName);
+
+                is = conn.getInputStream();
+                os = new FileOutputStream(new File(outputDir, fileName));
+
+                final int BUFFER_SIZE = 4096;
+                int bytesRead;
+                byte[] buffer = new byte[BUFFER_SIZE];
+
+
+                System.out.println("is.read(buffer) = " + is.read(buffer));
+                while ((bytesRead = is.read(buffer)) != -1) {
+                    os.write(buffer, 0, bytesRead);
+                }
+                os.close();
+                is.close();
+                System.out.println("File downloaded");
+            } else {
+                System.out.println("No file to download. Server replied HTTP code: " + responseCode);
+            }
+            conn.disconnect();
+
+        } catch (OpenTokException e) {
+            System.out.println(e.getMessage());
+        } catch (Exception e){
+            System.out.println("An error occurred while trying to download a file.");
+            e.printStackTrace();
+            try {
+                if (is != null){
+                    is.close();
+                }
+                if (os != null){
+                    os.close();
+                }
+            } catch (IOException e1){
+                e1.printStackTrace();
+            }
+        }
+
+        return rtn;
+
+    }
+
 
 }
 

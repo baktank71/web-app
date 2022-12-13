@@ -2,6 +2,7 @@ package kr.co.hconnect.service;
 import com.opentok.Archive;
 import com.opentok.OpenTok;
 import com.opentok.exception.OpenTokException;
+import kr.co.hconnect.vo.testVO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,6 +10,7 @@ import org.apache.commons.io.FileUtils;
 
 
 import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -25,6 +27,8 @@ import java.util.*;
 public class TestService {
 
 
+    private int apikey = 47595911;
+    private String apiSecret = "2ddde1eb92a2528bd22be0c465174636daca363d";
 
     public TestService() {
     }
@@ -49,10 +53,98 @@ public class TestService {
 
     }
 
-    public void fileDownload2(String url, String fileName) throws IOException, OpenTokException , MalformedURLException {
+    public String fileDownload2(testVO vo) throws IOException, OpenTokException , MalformedURLException {
 
-        File f= new File((fileName));
-        FileUtils.copyURLToFile(new URL(url), f);
+        String rtn = "";
+
+        String OUTPUT_FILE_PATH = ""; // "출력 파일 경로";
+        String FILE_URL ="";         // "리소스 경로";
+        //String archiveId = "ab279a4b-f158-417b-95e2-4f2e4f1a3428";
+        String outputDir  = "E:\\socre\\";
+        Archive archive = null;
+
+        InputStream is = null;
+        FileOutputStream os = null;
+
+        String archiveId = vo.getArchiveId();
+
+        try{
+            OpenTok openTok = new OpenTok(apikey, apiSecret);
+            archive =openTok.getArchive(archiveId);
+
+            FILE_URL = archive.getUrl();
+
+            rtn = FILE_URL;
+
+            //해당 url
+            URL url = new URL(FILE_URL);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            int responseCode = conn.getResponseCode();
+
+            System.out.println("responseCode " + responseCode);
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                String fileName = "";
+                String disposition = conn.getHeaderField("Content-Disposition");
+                String contentType = conn.getContentType();
+
+                // 일반적으로 Content-Disposition 헤더에 있지만
+                // 없을 경우 url 에서 추출해 내면 된다.
+                if (disposition != null) {
+                    String target = "filename=";
+                    int index = disposition.indexOf(target);
+                    if (index != -1) {
+                        fileName = disposition.substring(index + target.length() + 1);
+                    }
+                } else {
+                    //fileName = FILE_URL.substring(FILE_URL.lastIndexOf("/") + 1);
+                    fileName = "archive.mp4";
+
+                }
+
+                System.out.println("Content-Type = " + contentType);
+                System.out.println("Content-Disposition = " + disposition);
+                System.out.println("fileName = " + fileName);
+
+                is = conn.getInputStream();
+                os = new FileOutputStream(new File(outputDir, fileName));
+
+                final int BUFFER_SIZE = 4096;
+                int bytesRead;
+                byte[] buffer = new byte[BUFFER_SIZE];
+
+
+                System.out.println("is.read(buffer) = " + is.read(buffer));
+
+                while ((bytesRead = is.read(buffer)) != -1) {
+                    System.out.println("is read = " );
+                    os.write(buffer, 0, bytesRead);
+                }
+                os.close();
+                is.close();
+                System.out.println("File downloaded");
+            } else {
+                System.out.println("No file to download. Server replied HTTP code: " + responseCode);
+            }
+            conn.disconnect();
+
+        } catch (OpenTokException e) {
+            System.out.println(e.getMessage());
+        } catch (Exception e){
+            System.out.println("An error occurred while trying to download a file.");
+            e.printStackTrace();
+            try {
+                if (is != null){
+                    is.close();
+                }
+                if (os != null){
+                    os.close();
+                }
+            } catch (IOException e1){
+                e1.printStackTrace();
+            }
+        }
+
+        return rtn;
 
     }
 
@@ -63,7 +155,7 @@ public class TestService {
 
 
     }
-    public int fileDownload() throws IOException, OpenTokException {
+    public int fileDownload_file() throws IOException, OpenTokException {
 
         int rtn = 0;
 
