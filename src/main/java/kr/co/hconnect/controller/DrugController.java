@@ -97,13 +97,13 @@ public class DrugController {
      * @return
      */
     @RequestMapping(value = "/setTakeResult", method = RequestMethod.POST)
-    public ResponseVO<DrugAlarmSaveVO> insertDrugDose(@Validated(VoValidationGroups.add.class) @RequestBody DrugDoseSaveVO vo
+    public ResponseBaseVO<DrugAlarmSaveVO> insertDrugDose(@Validated(VoValidationGroups.add.class) @RequestBody DrugDoseSaveVO vo
         , BindingResult bindingResult, @RequestAttribute TokenDetailInfo tokenDetailInfo) {
 
         if (bindingResult.hasErrors()) {
             throw new InvalidRequestArgumentException(bindingResult);
         }
-        ResponseVO<DrugAlarmSaveVO> responseVO = new ResponseVO<>();
+        ResponseBaseVO<DrugAlarmSaveVO> responseVO = new ResponseBaseVO<>();
 
         String admisstionId = getAdmissionId(vo.getLoginId());
         String loginId = vo.getLoginId();
