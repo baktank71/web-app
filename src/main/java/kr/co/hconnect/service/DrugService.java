@@ -115,7 +115,7 @@ public class DrugService extends EgovAbstractServiceImpl {
 
         if (drugVO != null){
             //복약정보 등록
-            int drugDoseSeq = Integer.parseInt(drugDoseSeqGnrService.getNextStringId());
+            int drugDoseSeq = drugDoseSeqGnrService.getNextIntegerId();
 
             String noticeDD =vo.getResultDate();             //복약일자
             String noticeTime =vo.getResultTime();           //복약시간
