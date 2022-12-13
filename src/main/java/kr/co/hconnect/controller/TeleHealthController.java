@@ -134,7 +134,7 @@ public class TeleHealthController {
         }
         ResponseBaseVO<TeleHealthConnectVO> responseVO = new ResponseBaseVO<>();
         try{
-            int rtn = teleHealthService.sendPush(vo);
+            //int rtn = teleHealthService.sendPush(vo);
             responseVO.setCode(ApiResponseCode.SUCCESS.getCode());
             responseVO.setMessage("푸시메세지 정상 발송");
 
