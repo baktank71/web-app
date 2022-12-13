@@ -1,5 +1,6 @@
 package kr.co.hconnect.service;
 
+import com.opentok.Archive;
 import egovframework.rte.fdl.cmmn.EgovAbstractServiceImpl;
 import egovframework.rte.fdl.cmmn.exception.FdlException;
 import kr.co.hconnect.vo.*;
@@ -22,12 +23,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-
+import com.opentok.*;
+import com.opentok.exception.OpenTokException;
 
 @Service
 public class BatchService extends EgovAbstractServiceImpl{
 
     private  final  AiInferenceDao aiInferenceDao;
+
+
+    private int apikey = 47595911;
+    private String apiSecret = "2ddde1eb92a2528bd22be0c465174636daca363d";
+
+
     private String orgPath ="E:\\projects\\snuh_smile\\web-app\\src\\main\\resources\\inference\\score\\";
     @Autowired
     public BatchService(AiInferenceDao dao) {
@@ -240,6 +248,100 @@ public class BatchService extends EgovAbstractServiceImpl{
             }
         }
         return rtn;
+
+    }
+
+
+    /**
+     * 아카리브 파일 다운로드
+     * @return
+     */
+
+    public void fileDownload() throws IOException, OpenTokException {
+
+        String OUTPUT_FILE_PATH = "출력 파일 경로";
+        String FILE_URL = "리소스 경로";
+        String archiveId = "아카이브 파일 경로";
+
+        Archive archive = null;
+        try {
+
+            OpenTok openTok = new OpenTok(apikey, apiSecret);
+            archive =openTok.getArchive("archiveId");
+
+            FILE_URL = archive.getUrl();
+
+            InputStream in = new URL(FILE_URL).openStream();
+            Path imagePath = Paths.get(OUTPUT_FILE_PATH);
+            Files.copy(in, imagePath);
+
+            // BufferedInputStream in = new BufferedInputStream(new URL(FILE_URL).openStream());
+            // FileOutputStream fileOutputStream = new FileOutputStream(OUTPUT_FILE_PATH){
+            //     byte dataBuffer[] = new byte[1024];
+            //     int bytesRead;
+            //     while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+            //         fileOutputStream.write(dataBuffer, 0, bytesRead);
+            //     }
+            // }
+        } catch ( OpenTokException e){
+
+        } catch(IOException e){}
+
+        // try(InputStream in = new URL(FILE_URL).openStream()){
+        //     Path imagePath = Paths.get(OUTPUT_FILE_PATH);
+        //     Files.copy(in, imagePath);
+        // }
+
+
+    }
+
+    /**
+     * 파이썬 파일 실행
+     */
+
+    public void excuteFile() {
+
+        List<String> cmd = new ArrayList<String>();
+        cmd.add("/bin/bash");
+        cmd.add("-c");
+        cmd.add("/pythonCode/test.py");
+
+        StringBuilder sb = new StringBuilder(1024);
+        String s = null;
+        ProcessBuilder prsbld = null;
+        Process prs = null;
+
+        try {
+            prsbld = new ProcessBuilder(cmd);
+            // prsbld.directory(new File("/pythonCode")); // 디렉토리 이동
+            // System.out.println("command: " + prsbld.command()); 	// 커맨드 확인
+
+            // 프로세스 수행시작
+            prs = prsbld.start();
+
+            BufferedReader stdError = new BufferedReader(new InputStreamReader(prs.getErrorStream()));
+            while ((s = stdError.readLine()) != null)
+            {
+                sb.append(s);
+            }
+            prs.getErrorStream().close();
+            prs.getInputStream().close();
+            prs.getOutputStream().close();
+
+            // 종료까지 대기
+            prs.waitFor();
+
+        }catch (Exception e1) {
+        }
+        finally
+        {
+            if(prs != null)
+                try {
+                    prs.destroy();
+                } catch(Exception e2) {
+                }
+
+        }
 
     }
 
