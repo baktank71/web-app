@@ -71,12 +71,20 @@ public class TeleHealthService extends EgovAbstractServiceImpl{
             sessionId = teleEntity.getSessionId();
         }
 
+        System.out.println("sessionId ===============================================");
+        System.out.println("sessionId = ");
+        System.out.println("===============================================");
+
+
+
         //세션 id 가 없는 경우
         if (StringUtils.isEmpty(sessionId)) {
             OpenTok openTok = null;
             try {
                 vo.setApiKey(apikey);
                 vo.setApiSecret(apiSecret);
+
+                System.out.println("세션 생성");
 
                 //# 세션 생성
                 openTok = new OpenTok(vo.getApiKey(), vo.getApiSecret());
@@ -94,6 +102,8 @@ public class TeleHealthService extends EgovAbstractServiceImpl{
 
                 String ofToken = openTok.generateToken(ssid, tokenOptions);
 
+
+                System.out.println("화상상담 시작정보 저장");
                 //# 화상상담 시작정보 저장
                 teleVO.setLoginId(vo.getLoginId());
                 teleVO.setSessionId(ssid);
@@ -102,6 +112,8 @@ public class TeleHealthService extends EgovAbstractServiceImpl{
 
                 int rtn = teleHealthDao.insertSession(teleVO);
 
+
+                System.out.println("참석자(대상자 & 보호자)에게 푸시내역 생성");
                 //# 참석자(대상자 & 보호자)에게 푸시내역 생성
                 createTelehealthStartPush(teleVO);
 
@@ -180,12 +192,15 @@ public class TeleHealthService extends EgovAbstractServiceImpl{
     public void createTelehealthStartPush(TeleHealthConnectVO vo){
         //텔레헬스
         String admissionId = vo.getAdmissionId();
-        String CUID = userDao.selectPationtLoginId(admissionId);
-        System.out.println("=====================================");
-        System.out.println(CUID);
-        System.out.println("=====================================");
 
-        CUID = "smile01";
+        String CUID = userDao.selectPationtLoginId(admissionId);
+        System.out.println(" CUID =====================================");
+        System.out.println(admissionId);
+        System.out.println(CUID);
+        System.out.println(" CUID =====================================");
+
+        //CUID = "smile01";
+        //admissionId = "";
 
         String message = "화상진료를 시작합니다. 참여 부탁드립니다!";
         String sessionId  = vo.getSessionId();
@@ -200,7 +215,13 @@ public class TeleHealthService extends EgovAbstractServiceImpl{
             openTok = new OpenTok(vo.getApiKey(), vo.getApiSecret());
             String attendeeToken = openTok.generateToken(sessionId);
 
-            vo.setAttendeeToken(attendeeToken);
+            System.out.println("sessionId====================================================================");
+            System.out.println(sessionId);
+            System.out.println("sessionId====================================================================");
+
+            System.out.println("attendeeToken====================================================================");
+            System.out.println(attendeeToken);
+            System.out.println("attendeeToken====================================================================");
 
             //생성된 구독자 토큰 저장
 

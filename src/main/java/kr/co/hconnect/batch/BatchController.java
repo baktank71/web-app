@@ -7,6 +7,8 @@ import kr.co.hconnect.service.BatchService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RestController;
 
+import kr.co.hconnect.vo.*;
+
 import java.io.IOException;
 
 @Component
@@ -21,10 +23,15 @@ public class BatchController {
 
     private final BatchService batchService;
 
+
     @Autowired
     public BatchController(BatchService batchService) {
         this.batchService = batchService;
+
     }
+
+
+
 
     /**
      * 1. 스코어 배치 처리 하기
@@ -34,7 +41,17 @@ public class BatchController {
     @Scheduled(fixedDelay = 10000)
     public void scoreScheduler() throws IOException, InterruptedException {
         // System.out.println("1. 스코어 배치 처리 하기 ");
-        // batchService.score();
+
+        String filePath = "/home/administrator/python/score/score_file.csv";
+        String outfilePath = "/home/administrator/python/score/score_result.csv";
+
+        //BatchVO bvo = new BatchVO();
+        //bvo.setFilePath(filePath);
+        //bvo.setOutFilePath(outfilePath);
+        //batchService.scoreCreate(bvo);
+
+
+
 
         //파일 생성               scoreCreate
         //파이썬 실행             scoreExcute
@@ -67,5 +84,22 @@ public class BatchController {
         //파이썬 실행
         //파일 테이블 insert depressedhist / depressedDelete / depressedinsert
     }
+
+
+    /**
+     * 파일 다운로드
+     */
+
+
+
+    @Scheduled(fixedDelay = 30000)
+    public void fileDownScheduler(){
+        //System.out.println("3. 우울 배치 처리 하기 ");
+        //파일 생성          depressedCreate
+        //파이썬 실행
+        //파일 테이블 insert depressedhist / depressedDelete / depressedinsert
+    }
+
+
 
 }

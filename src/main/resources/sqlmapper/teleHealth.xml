@@ -42,6 +42,7 @@
     <update id="udpSubscriberToken" parameterType="kr.co.hconnect.vo.TeleHealthConnectVO">
         update telehealth
            set ATTENDEE_TOKEN = #{attendeeToken}
+              ,USE_END_DD = DATE_FORMAT(NOW(), '%Y%m%d')
         where ADMISSION_ID = #{admissionId}
           and SESSION_ID = #{sessionId}
         ;

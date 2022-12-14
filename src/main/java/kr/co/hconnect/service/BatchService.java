@@ -33,44 +33,122 @@ public class BatchService extends EgovAbstractServiceImpl{
 
     private  final  AiInferenceDao aiInferenceDao;
 
-
     private int apikey = 47595911;
     private String apiSecret = "2ddde1eb92a2528bd22be0c465174636daca363d";
 
-
     private String orgPath ="E:\\projects\\snuh_smile\\web-app\\src\\main\\resources\\inference\\score\\";
+
     @Autowired
     public BatchService(AiInferenceDao dao) {
         this.aiInferenceDao = dao;
     }
 
 
-    @Transactional(rollbackFor = Exception.class)
-    public void score() throws IOException, InterruptedException {
-        //create
+    public int scoreCreate(BatchVO vo) {
 
-        String rtnIns = scoreInsert();
+        int resultCount = 0;
 
-        // AiInferenceVO entity = new AiInferenceVO();
-        // entity.setInfDiv("10");
-        //
-        // String filePath = "./resources/inference/score/score.csv";
-        // int rtnScore = csvCreate(filePath);
-        // if (rtnScore != 0) {
-        //     if ( pythonProcessbuilder() ){       //파일썬 실행
-        //
-        //         dao.insInf_log(entity);   //히스토리
-        //
-        //         dao.delInf(entity);       //scoreDelete
-        //
-        //         String rtnIns = scoreInsert();
-        //
-        //     }
-        // }
+        List list= null;
+        String filePath = vo.getFilePath();
 
+        //데이터를 받아오고 파일로 쓰기
+        try {
+
+            File file = new File(filePath);
+
+            if( file.exists() ) {
+                file.delete();
+            }
+
+            //csv 파일의 기존 값에 이어쓰려면 위처럼 tru를 지정하고 기존갑을 덮어 쓰려면 true를 삭제한다
+            BufferedWriter fw = new BufferedWriter(new FileWriter(filePath));
+
+            //쿼리 를 한다.
+            //
+            List<ScoreVO> dataList = aiInferenceDao.scoreList();
+
+            if (dataList.size() > 0 ) {
+                //타이틀 넣기
+                String tData = "";
+                tData = "환자 id";   //환자 id
+                tData += "," + "나이";    // 나이
+                tData += "," + "심박수";     //심박수
+                tData += "," + "산소포화도";   // 산소포화도
+                tData += "," + "혈압";       //혈압
+                tData += "," + "체온";     //체온
+                tData += "," + "고혈압여부";    //고혈압 여부
+
+                fw.write(tData);
+                fw.newLine();
+
+                for (ScoreVO dt : dataList) {
+                    String aData = "";
+                    aData = dt.getAdmissionId().toString();   //환자 id
+                    aData += "," + dt.getAge();    // 나이
+                    aData += "," + dt.getPr();     //심박수
+                    aData += "," + dt.getSpo2();   // 산소포화도
+                    aData += "," + dt.getSbp();    //수축기 혈압
+                    aData += "," + dt.getBt();     //체온
+                    aData += "," + dt.getHyp();    //고혈압 여부
+
+                    fw.write(aData);
+                    fw.newLine();
+                }
+            }
+            fw.flush();
+            //객체 닫기
+            fw.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } finally {
+            return resultCount;
+        }
 
     }
 
+    public String scoreInsert(BatchVO vo) throws IOException, InterruptedException {
+
+        String rtn = "0";
+        //csv file open
+        //     /home/administrator/pythonCode
+        File csv = new File(vo.getOutFilePath());
+
+        BufferedReader br = null;
+        String line = "";
+
+        try{
+            br = new BufferedReader(new FileReader(csv));
+            while ((line = br.readLine()) != null){
+                String[] lineArr = line.split(",");
+
+                AiInferenceVO entityVO = new AiInferenceVO();
+                entityVO.setAdmissionId(lineArr[0]);
+                entityVO.setInfDiv("10");
+                entityVO.setInfValue(Float.parseFloat(lineArr[1].toString()));
+
+                aiInferenceDao.insInf(entityVO);  // 인서트
+
+                System.out.println(lineArr[0]);
+                System.out.println(lineArr[1]);
+            }
+        }catch (FileNotFoundException e){
+            System.out.println(e.getMessage());
+        }catch ( IOException e){
+            System.out.println(e.getMessage());
+        }finally {
+            try{
+                if(br != null){
+                    br.close();
+                }
+            }catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return rtn;
+
+    }
 
 
     @Transactional(rollbackFor = Exception.class)
@@ -180,78 +258,7 @@ public class BatchService extends EgovAbstractServiceImpl{
     }
 
 
-    public String scoreInsert() throws IOException, InterruptedException {
 
-        String rtn = "0";
-        //csv file open
-
-        String filePath = orgPath + "result_score.csv";
-        File csv = new File(filePath);
-
-        //File csv = ResourceUtils.getFile('classpath:inference/score/result_score.csv');
-        //File csv = ResourceUtils.getFile(ResourceUtils.CLASSPATH_URL_PREFIX + "inference/score/result_score.csv");
-
-        BufferedReader br = null;
-        String line = "";
-
-        try{
-            br = new BufferedReader(new FileReader(csv));
-            while ((line = br.readLine()) != null){
-                String[] lineArr = line.split(",");
-
-                // AiInferenceVO entityVO = new AiInferenceVO();
-                // entityVO.setAdmissionId(lineArr[0]);
-                // entityVO.setInfDiv("10");
-                // entityVO.setInfValue(Float.parseFloat(lineArr[1].toString()));
-                //
-                // dao.insInf(entityVO);  // 인서트
-
-                System.out.println(lineArr[0]);
-                System.out.println(lineArr[1]);
-            }
-        }catch (FileNotFoundException e){
-            System.out.println(e.getMessage());
-        }catch ( IOException e){
-            System.out.println(e.getMessage());
-        }finally {
-            try{
-                if(br != null){
-                    br.close();
-
-                    //파일 이동
-
-                    // csv.getPath()
-                    // Path filePath = Paths.get(File.separatorChar + "inference/score", File.separatorChar + "result_score.csv");
-                    //
-                    // Path filePathToMove = Paths.get(ResourceUtils.CLASSPATH_URL_PREFIX + "inference/score/backup/result_score.csv");
-                    //
-
-                    SimpleDateFormat format = new SimpleDateFormat ( "yyyyMMddHHmm");
-
-                    String formatdate = format.format (System.currentTimeMillis());
-
-                    System.out.println(formatdate);
-
-                    Path fileRenamePath = Paths.get(orgPath+ "result_score_"+ formatdate + ".csv");
-
-                    System.out.println(fileRenamePath);
-
-
-                    Path filePathToMove = Paths.get(orgPath + "backup\\result_score.csv");
-                    System.out.println(filePath);
-                    System.out.println(filePathToMove);
-
-                    //Files.move(filePath, filePathToMove);
-
-
-                }
-            }catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return rtn;
-
-    }
 
 
 
@@ -307,24 +314,42 @@ public class BatchService extends EgovAbstractServiceImpl{
     }
 
 
+
+    public int vonageArchiveList() {
+
+        ArchiveVO avo = new ArchiveVO();
+
+        List<ArchiveVO> rtnvoList = new ArrayList<>();
+        rtnvoList = aiInferenceDao.archiveList(avo);
+
+        if (rtnvoList != null) {
+
+            for (ArchiveVO rvo : rtnvoList) {
+
+                //  String strRtn = fileDownload(rvo);
+            }
+
+        }
+        return 0;
+    }
     /**
      * 아카리브 파일 다운로드
      * @return
      */
-    public String fileDownload(ArchiveVO vo) throws IOException, OpenTokException , MalformedURLException {
+    public String fileDownload(String aid, String aName) throws IOException, OpenTokException , MalformedURLException {
 
         String rtn = "";
 
         String OUTPUT_FILE_PATH = ""; // "출력 파일 경로";
         String FILE_URL ="";         // "리소스 경로";
-        String outputDir  = "E:\\socre\\";
+        String outputDir  = "/home/administrator/python/depressed/";
         Archive archive = null;
 
         InputStream is = null;
         FileOutputStream os = null;
 
         //아카이브 아이디 찾기
-        String archiveId = vo.getArchiveId();
+        String archiveId = aid;
 
         try{
             OpenTok openTok = new OpenTok(apikey, apiSecret);
@@ -364,7 +389,7 @@ public class BatchService extends EgovAbstractServiceImpl{
                 //A999999624_202212130737
                 SimpleDateFormat format = new SimpleDateFormat ( "yyyyMMddHHmm");
                 String formatdate = format.format (System.currentTimeMillis());
-                fileName =vo.getName() +"_"+ formatdate+ ".mp4";
+                fileName =aName +"_"+ formatdate+ ".mp4";
 
                 System.out.println("Content-Type = " + contentType);
                 System.out.println("Content-Disposition = " + disposition);

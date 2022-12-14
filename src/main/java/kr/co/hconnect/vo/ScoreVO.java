@@ -56,4 +56,11 @@ public class ScoreVO implements Serializable{
      * 체온
      */
     private String ache;
+
+    /**
+     * 고혈압여부
+     */
+    private String hyp;
+
+    
 }

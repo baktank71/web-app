@@ -1,8 +1,12 @@
 package kr.co.hconnect.service;
+
+
 import com.opentok.Archive;
 import com.opentok.OpenTok;
 import com.opentok.exception.OpenTokException;
-import kr.co.hconnect.vo.testVO;
+import kr.co.hconnect.vo.*;
+import kr.co.hconnect.repository.AiInferenceDao;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +34,10 @@ public class TestService {
     private int apikey = 47595911;
     private String apiSecret = "2ddde1eb92a2528bd22be0c465174636daca363d";
 
-    public TestService() {
+    private final AiInferenceDao aiInferenceDao;
+
+    public TestService(AiInferenceDao aiInferenceDao) {
+        this.aiInferenceDao = aiInferenceDao;
     }
 
     public void fileDownload_Url() throws IOException, OpenTokException {
@@ -193,5 +200,69 @@ public class TestService {
         }
         return rtn;
     }
+
+    public int csvCreate(testVO vo) {
+        int resultCount = 0;
+
+        List list= null;
+        String filePath = vo.getFilePath();
+
+        //데이터를 받아오고 파일로 쓰기
+        try {
+
+            File file = new File(filePath);
+
+            if( file.exists() ) {
+                file.delete();
+            }
+
+            //csv 파일의 기존 값에 이어쓰려면 위처럼 tru를 지정하고 기존갑을 덮어 쓰려면 true를 삭제한다
+            BufferedWriter fw = new BufferedWriter(new FileWriter(filePath));
+
+            //쿼리 를 한다.
+            //
+            List<ScoreVO> dataList = aiInferenceDao.scoreList();
+
+            if (dataList.size() > 0 ) {
+                //타이틀 넣기
+                String tData = "";
+                tData = "환자 id";   //환자 id
+                tData += "," + "나이";    // 나이
+                tData += "," + "심박수";     //심박수
+                tData += "," + "산소포화도";   // 산소포화도
+                tData += "," + "혈압";       //혈압
+                tData += "," + "체온";     //체온
+                tData += "," + "고혈압여부";    //고혈압 여부
+
+                fw.write(tData);
+                fw.newLine();
+
+                for (ScoreVO dt : dataList) {
+                    String aData = "";
+                    aData = dt.getAdmissionId();   //환자 id
+                    aData += "," + dt.getAge();    // 나이
+                    aData += "," + dt.getPr();     //심박수
+                    aData += "," + dt.getSpo2();   // 산소포화도
+                    aData += "," + dt.getSbp();    //수축기 혈압
+                    aData += "," + dt.getBt();     //체온
+                    aData += "," + dt.getHyp();    //고혈압 여부
+
+                    fw.write(aData);
+                    fw.newLine();
+                }
+            }
+            fw.flush();
+            //객체 닫기
+            fw.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } finally {
+            return resultCount;
+        }
+
+    }
+
 
 }

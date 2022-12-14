@@ -53,9 +53,9 @@
                     /* 나이 */
                      , YEAR(NOW())-LEFT(P.BIRTH_DATE,4) + 1                    as age
                     /* 맥박수 심박수 */
-                     , ifnull(RDPR.result, 0)                                  as spo2
+                     , ifnull(RDPR.result, 0)                                  as pr
                     /* 산소포화도 */
-                     , ifnull(RDSP.result, 0)                                  AS '산소포화도'
+                     , ifnull(RDSP.result, 0)                                  AS spo2
                     /* 수축기 */
                      , ifnull(RDSBP.result, 0)                                 AS sbp
                     /* 이완기 */
@@ -71,7 +71,7 @@
                                 and id.ANSWER_SEQ = '54'
                                 and id.ANSWER_VALUE like '%2%'
                                 and i.ADMISSION_ID = a.ADMISSION_ID), 0
-                                ) as ache
+                                ) as hyp
                 FROM ADMISSION A
                     inner join patient p               on A.PATIENT_ID  = P.PATIENT_ID
                     /* 혈압 */
