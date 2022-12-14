@@ -66,4 +66,38 @@ public class testController {
 
         return responseVO;
     }
+
+
+    /**
+     * CSV FILE 만들기
+     * @param vo
+     * @param bindingResult
+     * @param tokenDetailInfo
+     * @return
+     */
+    @RequestMapping(value = "/csvFile", method = RequestMethod.POST)
+    public ResponseBaseVO<testVO> createCsv(@Validated(VoValidationGroups.add.class) @RequestBody testVO vo
+        , BindingResult bindingResult, @RequestAttribute TokenDetailInfo tokenDetailInfo) {
+
+        ResponseBaseVO<testVO> responseVO = new ResponseBaseVO<>();
+
+        try {
+
+            int rtn = testService.csvCreate(vo);
+
+            vo.setCount(rtn);
+
+            responseVO.setCode(ApiResponseCode.SUCCESS.getCode());
+            responseVO.setMessage("csv File ok");
+            responseVO.setResult(vo);
+
+        } catch (NotFoundUserInfoException e) {
+            responseVO.setCode(ApiResponseCode.CODE_INVALID_REQUEST_PARAMETER.getCode());
+            responseVO.setMessage(e.getMessage());
+        }
+
+        return responseVO;
+    }
+
+
 }

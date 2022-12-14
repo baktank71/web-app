@@ -16,7 +16,7 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @ToString
-public class testVO implements Serializable {
+public class BatchVO implements Serializable {
 
     private String loginId;
 
@@ -26,6 +26,8 @@ public class testVO implements Serializable {
 
 
     private String filePath;
+
+    private String outFilePath;
 
     private int count;
 
