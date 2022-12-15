@@ -62,7 +62,7 @@ public class TeleHealthController {
             System.out.println(adid);
             System.out.println("adid =======================================");
             if (StringUtils.isEmpty(adid)){
-                vo.setAdmissionId("0000000077");  //임시로
+                vo.setAdmissionId("0000000076");  //임시로 박용범
             }
             TeleHealthConnectVO dt = teleHealthService.selectConnection(vo);
             responseVO.setCode(ApiResponseCode.SUCCESS.getCode());
