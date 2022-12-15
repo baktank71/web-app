@@ -272,7 +272,7 @@ public class BatchService extends EgovAbstractServiceImpl{
         List<String> cmd = new ArrayList<String>();
         cmd.add("/bin/bash");
         cmd.add("-c");
-        cmd.add("/pythonCode/test.py");
+        cmd.add("/python/score/scoring.sh");
 
         StringBuilder sb = new StringBuilder(1024);
         String s = null;
