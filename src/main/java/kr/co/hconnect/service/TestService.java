@@ -265,4 +265,21 @@ public class TestService {
     }
 
 
+    public void fileExe(testVO vo) throws IOException, InterruptedException {
+
+        Runtime rt = Runtime.getRuntime();
+
+        String file = "E:\\temp\\putty.exe";
+
+        Process pro;
+
+        try {
+            pro = rt.exec(file);
+            pro.waitFor();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+    }
+
 }

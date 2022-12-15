@@ -100,4 +100,35 @@ public class testController {
     }
 
 
+    @RequestMapping(value = "/fileExe", method = RequestMethod.POST)
+    public ResponseBaseVO<testVO> fileExe(@Validated(VoValidationGroups.add.class) @RequestBody testVO vo
+        , BindingResult bindingResult, @RequestAttribute TokenDetailInfo tokenDetailInfo) {
+
+        ResponseBaseVO<testVO> responseVO = new ResponseBaseVO<>();
+
+        try {
+
+
+           testService.fileExe(vo);
+
+            responseVO.setCode(ApiResponseCode.SUCCESS.getCode());
+            responseVO.setMessage("csv File ok");
+            responseVO.setResult(vo);
+
+        } catch (NotFoundUserInfoException e) {
+            responseVO.setCode(ApiResponseCode.CODE_INVALID_REQUEST_PARAMETER.getCode());
+            responseVO.setMessage(e.getMessage());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        return responseVO;
+    }
+
+
+
+
+
 }
