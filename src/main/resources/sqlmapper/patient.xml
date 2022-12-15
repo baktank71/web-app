@@ -15,6 +15,7 @@
              , ZIP_CODE             -- 우편번호
              , ADDRESS1             -- 주소
              , ADDRESS2             -- 상세주소
+             , SEARS_ACCOUNT        -- 시어스 계정
           FROM PATIENT
          WHERE PATIENT_ID = #{patientId}
 	</select>
@@ -33,6 +34,7 @@
              , ZIP_CODE             -- 우편번호
              , ADDRESS1             -- 주소
              , ADDRESS2             -- 상세주소
+		     , SEARS_ACCOUNT        -- 시어스 계정
           FROM PATIENT
          WHERE LOGIN_ID = #{loginId}
 	]]>
