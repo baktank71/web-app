@@ -5,6 +5,7 @@ import kr.co.hconnect.common.VoValidationGroups;
 import kr.co.hconnect.exception.InvalidRequestArgumentException;
 import kr.co.hconnect.jwt.TokenDetailInfo;
 import kr.co.hconnect.vo.*;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -56,6 +57,13 @@ public class TeleHealthController {
         try{
             vo.setLoginId(tokenDetailInfo.getId());
 
+            String adid = vo.getAdmissionId();
+            System.out.println("adid =======================================");
+            System.out.println(adid);
+            System.out.println("adid =======================================");
+            if (StringUtils.isEmpty(adid)){
+                vo.setAdmissionId("0000000077");  //임시로
+            }
             TeleHealthConnectVO dt = teleHealthService.selectConnection(vo);
             responseVO.setCode(ApiResponseCode.SUCCESS.getCode());
             responseVO.setMessage("저장 완료");
