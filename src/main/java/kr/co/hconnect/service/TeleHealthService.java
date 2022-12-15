@@ -71,9 +71,9 @@ public class TeleHealthService extends EgovAbstractServiceImpl{
             sessionId = teleEntity.getSessionId();
         }
 
-        System.out.println("sessionId ===============================================");
-        System.out.println("sessionId = ");
-        System.out.println("===============================================");
+        System.out.println("public sessionId ===============================================");
+        System.out.println("public sessionId = ");
+        System.out.println("public  ===============================================");
 
 
 

@@ -1,6 +1,6 @@
 package kr.co.hconnect.controller;
 import com.opentok.exception.OpenTokException;
-import com.sun.xml.internal.ws.api.ha.StickyFeature;
+
 import egovframework.rte.fdl.cmmn.exception.FdlException;
 import kr.co.hconnect.common.ApiResponseCode;
 import kr.co.hconnect.common.VoValidationGroups;
