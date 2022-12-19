@@ -259,10 +259,27 @@
                          THEN '1'
                     ELSE      '2'
                END                          AS QANTN_STATUS   -- 입소/격리 상태
+             ,CASE WHEN IFNULL(DN.ITEM_ID,'0000') = 'I0001' THEN IFNULL(DN.CHA,'X')
+                   ELSE 'X' END BT_DOWN                        -- 체온다운로드
+             ,CASE WHEN IFNULL(DN.ITEM_ID,'0000') = 'I0002' THEN IFNULL(DN.CHA,'X')
+                   ELSE 'X' END PR_DOWN
+             ,CASE WHEN IFNULL(DN.ITEM_ID,'0000') = 'I0002' THEN IFNULL(DN.CHA,'X')
+                   ELSE 'X' END RR_DOWN
 		  FROM ADMISSION A
 			   INNER JOIN PATIENT 			P      ON A.PATIENT_ID = P.PATIENT_ID
-         WHERE A.QANTN_DIV = '1'            -- 자가격리자 구분
+			   LEFT OUTER JOIN (
+	                    SELECT
+                              R.ADMISSION_ID,
+                              R.ITEM_ID,
+                              CASE WHEN DATE_FORMAT(TIMEDIFF(NOW(),MAX(R.REG_DT)), '%H') <=2 THEN 'O' ELSE 'X' END AS CHA
+                          FROM  RESULT R
+                               INNER JOIN RESULT_DETAIL RD
+                                  ON R.RESULT_SEQ  = RD.RESULT_SEQ
+                         WHERE R.ITEM_ID IN ('I0001','I0002','I0006')
+                         GROUP BY ADMISSION_ID, R.ITEM_ID
+			   ) DN ON A.ADMISSION_ID  = DN. ADMISSION_ID         WHERE A.QANTN_DIV = '1'            -- 자가격리자 구분
 		   AND A.DEL_YN = 'N'
+
 	]]>
 
 		<if test="@org.apache.commons.lang3.StringUtils@isNotEmpty(patientId)">
