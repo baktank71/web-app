@@ -100,8 +100,8 @@ public class testController {
     }
 
 
-    @RequestMapping(value = "/fileExe", method = RequestMethod.POST)
-    public ResponseBaseVO<testVO> fileExe(@Validated(VoValidationGroups.add.class) @RequestBody testVO vo
+    @RequestMapping(value = "/fileExe2", method = RequestMethod.POST)
+    public ResponseBaseVO<testVO> fileExe2(@Validated(VoValidationGroups.add.class) @RequestBody testVO vo
         , BindingResult bindingResult, @RequestAttribute TokenDetailInfo tokenDetailInfo) {
 
         ResponseBaseVO<testVO> responseVO = new ResponseBaseVO<>();
@@ -109,10 +109,10 @@ public class testController {
         try {
 
 
-           testService.fileExe(vo);
+           testService.fileExe2(vo);
 
             responseVO.setCode(ApiResponseCode.SUCCESS.getCode());
-            responseVO.setMessage("csv File ok");
+            responseVO.setMessage("fileExe2 ok");
             responseVO.setResult(vo);
 
         } catch (NotFoundUserInfoException e) {
@@ -122,6 +122,31 @@ public class testController {
             throw new RuntimeException(e);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
+        }
+
+        return responseVO;
+    }
+
+
+
+    @RequestMapping(value = "/fileExe3", method = RequestMethod.POST)
+    public ResponseBaseVO<testVO> fileExe3(@Validated(VoValidationGroups.add.class) @RequestBody testVO vo
+        , BindingResult bindingResult, @RequestAttribute TokenDetailInfo tokenDetailInfo) {
+
+        ResponseBaseVO<testVO> responseVO = new ResponseBaseVO<>();
+
+        try {
+
+
+            testService.fileExe3(vo);
+
+            responseVO.setCode(ApiResponseCode.SUCCESS.getCode());
+            responseVO.setMessage("fileExec3 ok");
+            responseVO.setResult(vo);
+
+        } catch (NotFoundUserInfoException e) {
+            responseVO.setCode(ApiResponseCode.CODE_INVALID_REQUEST_PARAMETER.getCode());
+            responseVO.setMessage(e.getMessage());
         }
 
         return responseVO;

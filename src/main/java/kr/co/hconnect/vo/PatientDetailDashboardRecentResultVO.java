@@ -185,6 +185,10 @@ public class PatientDetailDashboardRecentResultVO implements Serializable {
     private String respiratoryRiskUnit;
 
     /**
+     * 호흡기계 스코어 이름
+     */
+    private String riskScoreNm;
+    /**
      * 호흡기계 스코어 위험
      */
     private String riskScoreResult;
@@ -196,6 +200,10 @@ public class PatientDetailDashboardRecentResultVO implements Serializable {
     private Timestamp riskScoreDt;
 
     /**
+     * 호흡기계 체온 이름
+     */
+    private String riskTemperNm;
+    /**
      * 호흡기계 체온 위험
      */
     private String riskTemperResult;
@@ -206,6 +214,11 @@ public class PatientDetailDashboardRecentResultVO implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Timestamp riskTemperDt;
 
+
+    /**
+     * 정신건강 우울 이름
+     */
+    private String mentalRiskNm;
 
     /**
      * 정신건강 우울 위험

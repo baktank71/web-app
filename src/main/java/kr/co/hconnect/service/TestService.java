@@ -282,4 +282,79 @@ public class TestService {
 
     }
 
+
+    public void fileExe2(testVO vo) throws IOException, InterruptedException {
+
+        Runtime rt = Runtime.getRuntime();
+
+        String file = "/python/score/scoring.py";
+
+        Process pro;
+
+        try {
+            pro = rt.exec(file);
+            pro.waitFor();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+    }
+
+    public void fileExe3(testVO vo) {
+
+        List<String> cmd = new ArrayList<String>();
+        cmd.add("cd");
+        cmd.add("/python/score");
+        cmd.add("./scoring.py");
+
+        StringBuilder sb = new StringBuilder(1024);
+        String s = null;
+        ProcessBuilder prsbld = null;
+        Process prs = null;
+
+        try {
+            prsbld = new ProcessBuilder(cmd);
+            // prsbld.directory(new File("/pythonCode")); // 디렉토리 이동
+            // System.out.println("command: " + prsbld.command()); 	// 커맨드 확인
+
+            // 프로세스 수행시작
+            System.out.println("수행시작");
+            prs = prsbld.start();
+            System.out.println("수행시작 1");
+
+            BufferedReader stdError = new BufferedReader(new InputStreamReader(prs.getErrorStream()));
+            while ((s = stdError.readLine()) != null)
+            {
+                sb.append(s);
+            }
+            prs.getErrorStream().close();
+            prs.getInputStream().close();
+            prs.getOutputStream().close();
+
+            System.out.println("수행종료");
+
+            // 종료까지 대기
+            System.out.println("종료까지 대기");
+            prs.waitFor();
+
+        }catch (Exception e1) {
+            System.out.println("오류가 발생 되었습니다.");
+            System.out.println(e1.getMessage());
+        }
+        finally
+        {
+            if(prs != null)
+                try {
+                    prs.destroy();
+                    System.out.println("프로세스 종료");
+                } catch(Exception e2) {
+                    System.out.println("오류가 발생 되었습니다.");
+                    System.out.println(e2.getMessage());
+                }
+
+        }
+
+    }
+
+
 }
